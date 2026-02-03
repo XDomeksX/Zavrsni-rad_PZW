@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Categories</title>
+</head>
+<body>
+    <h1>Categories</h1>
+
+    <p><a href="{% url 'main:home' %}">Home</a></p>
+    <p><a href="{% url 'main:category_add' %}">+ Add Category</a></p>
+
+    <ul>
+        {% for c in categories %}
+            <li>
+                <a href="{% url 'main:category_detail' c.pk %}">{{ c.name }}</a>
+            </li>
+        {% empty %}
+            <li>No categories.</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

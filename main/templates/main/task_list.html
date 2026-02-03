@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tasks</title>
+</head>
+<body>
+    <h1>Tasks</h1>
+
+    <p><a href="{% url 'main:home' %}">Home</a></p>
+
+    <p><a href="{% url 'main:task_add' %}">+ Add Task</a></p>
+
+    <form method="get">
+        <input type="text" name="q" placeholder="Search..." value="{{ q }}">
+
+        <select name="status">
+            <option value="">All statuses</option>
+            {% for value, label in status_choices %}
+                <option value="{{ value }}" {% if status == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Filter</button>
+        <a href="{% url 'main:task_list' %}">Reset</a>
+    </form>
+
+
+    <p><a href="{% url 'main:category_list' %}">Categories</a></p>
+
+    <ul>
+        {% for task in tasks %}
+            <li>
+                <a href="{% url 'main:task_detail' task.pk %}">
+                    {{ task.title }}
+                </a>
+                - {{ task.get_status_display }}
+                {% if task.due_date %}- Due: {{ task.due_date }}{% endif %}
+            </li>
+        {% empty %}
+            <li>Nema taskova.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

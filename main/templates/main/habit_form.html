@@ -1,0 +1,243 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Habit</title>
+</head>
+<body>
+    <h1>Habit</h1>
+    <p><a href="{% url 'main:habit_list' %}">← Back to list</a></p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <p>{{ form.name.label_tag }} {{ form.name }}</p>
+        <p>{{ form.active.label_tag }} {{ form.active }}</p>
+
+        <p>{{ form.frequency.label_tag }} {{ form.frequency }}</p>
+
+        <p id="target_row">
+            <label id="target_label" for="{{ form.target_count.id_for_label }}">Target count</label>
+            {{ form.target_count }}
+            {% for error in form.target_count.errors %}
+                <span style="color:red;">{{ error }}</span>
+            {% endfor %}
+        </p>
+
+        <div id="times_row">
+            <p><strong>Preferred times</strong></p>
+
+            <!-- Hidden real field stored in DB -->
+            <input type="hidden"
+                    id="id_preferred_times"
+                    name="preferred_times"
+                    value="{{ form.preferred_times.value|default_if_none:'' }}">
+
+            <!-- Picker + add button -->
+            <input type="time" id="time_picker" step="60">
+            <button type="button" id="add_time_btn">Add</button>
+
+            <ul id="times_list"></ul>
+
+            {% for error in form.preferred_times.errors %}
+                <span style="color:red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+
+        <div id="weekdays_row">
+            <p><strong>Preferred weekdays</strong></p>
+            {{ form.preferred_weekdays_list }}
+        </div>
+
+        <div id="months_row">
+            <p><strong>Preferred months</strong></p>
+            {{ form.preferred_months_list }}
+        </div>
+
+        <hr>
+
+        <!-- Reminder toggle -->
+        <p>
+            <label for="{{ form.reminder_enabled.id_for_label }}"><strong>Reminder</strong></label>
+            {{ form.reminder_enabled }}
+        </p>
+
+        <div id="reminder_fields">
+            <p>
+                <label for="{{ form.reminder_start.id_for_label }}">Remind on</label>
+                {{ form.reminder_start }}
+                {% for error in form.reminder_start.errors %}
+                    <span style="color:red;">{{ error }}</span>
+                {% endfor %}
+            </p>
+
+            <p>
+                <label for="{{ form.reminder_repeat.id_for_label }}">Repeat</label>
+                {{ form.reminder_repeat }}
+                {% for error in form.reminder_repeat.errors %}
+                    <span style="color:red;">{{ error }}</span>
+                {% endfor %}
+            </p>
+
+            <div id="repeat_until_row">
+                <p>
+                    <label for="{{ form.reminder_until.id_for_label }}">Repeat until</label>
+                    {{ form.reminder_until }}
+                    {% for error in form.reminder_until.errors %}
+                        <span style="color:red;">{{ error }}</span>
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
+
+        <button type="submit">Save</button>
+    </form>
+
+    <script>
+        function updateHabitForm() {
+            const freq = document.getElementById("id_frequency").value;
+            const reminderEnabled = document.getElementById("id_reminder_enabled").checked;
+
+            // Target label
+            const targetLabel = document.getElementById("target_label");
+            const map = {
+                "hourly": "Target per hour",
+                "daily": "Target per day",
+                "weekly": "Target per week",
+                "monthly": "Target per month",
+                "yearly": "Target per year"
+            };
+            targetLabel.textContent = map[freq] || "Target count";
+
+            // Planning fields visibility by frequency
+            const timesRow = document.getElementById("times_row");
+            const weekdaysRow = document.getElementById("weekdays_row");
+            const monthsRow = document.getElementById("months_row");
+
+            // Hourly: only target
+            if (freq === "hourly") {
+                timesRow.style.display = "none";
+                weekdaysRow.style.display = "none";
+                monthsRow.style.display = "none";
+            }
+            // Daily: target + times
+            else if (freq === "daily") {
+                timesRow.style.display = "block";
+                weekdaysRow.style.display = "none";
+                monthsRow.style.display = "none";
+            }
+            // Weekly: target + times + weekdays
+            else if (freq === "weekly") {
+                timesRow.style.display = "block";
+                weekdaysRow.style.display = "block";
+                monthsRow.style.display = "none";
+            }
+            // Monthly: target + times + weekdays
+            else if (freq === "monthly") {
+                timesRow.style.display = "block";
+                weekdaysRow.style.display = "block";
+                monthsRow.style.display = "none";
+            }
+            // Yearly: target + times + weekdays + months
+            else if (freq === "yearly") {
+                timesRow.style.display = "block";
+                weekdaysRow.style.display = "block";
+                monthsRow.style.display = "block";
+            }
+
+            // Reminder fields visibility
+            const reminderFields = document.getElementById("reminder_fields");
+            reminderFields.style.display = reminderEnabled ? "block" : "none";
+
+            // Repeat until visibility (only if repeat != none)
+            const repeatSelect = document.getElementById("id_reminder_repeat");
+            const repeatUntilRow = document.getElementById("repeat_until_row");
+            if (repeatSelect) {
+                repeatUntilRow.style.display = (repeatSelect.value !== "none") ? "block" : "none";
+            }
+        }
+
+        document.getElementById("id_frequency").addEventListener("change", updateHabitForm);
+        document.getElementById("id_reminder_enabled").addEventListener("change", updateHabitForm);
+
+        const repeatSelect = document.getElementById("id_reminder_repeat");
+        if (repeatSelect) {
+            repeatSelect.addEventListener("change", updateHabitForm);
+        }
+
+        updateHabitForm();
+    </script>
+</body>
+</html>
+
+<script>
+  function parseTimes(csv) {
+    if (!csv) return [];
+    return csv.split(",").map(x => x.trim()).filter(Boolean);
+  }
+
+  function serializeTimes(times) {
+    const unique = Array.from(new Set(times));
+    unique.sort();
+    return unique.join(",");
+  }
+
+  function renderTimes() {
+    const hidden = document.getElementById("id_preferred_times");
+    const list = document.getElementById("times_list");
+    if (!hidden || !list) return;
+
+    const times = parseTimes(hidden.value);
+    list.innerHTML = "";
+
+    times.forEach(t => {
+      const li = document.createElement("li");
+      li.textContent = toAmPm(t) + " ";
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = "Remove";
+      btn.addEventListener("click", () => {
+        const newTimes = parseTimes(hidden.value).filter(x => x !== t);
+        hidden.value = serializeTimes(newTimes);
+        renderTimes();
+      });
+
+      li.appendChild(btn);
+      list.appendChild(li);
+    });
+  }
+
+  function addTime() {
+    const picker = document.getElementById("time_picker");
+    const hidden = document.getElementById("id_preferred_times");
+    if (!picker || !hidden) return;
+
+    const val = picker.value; // "HH:MM"
+    if (!val) return;
+
+    const times = parseTimes(hidden.value);
+    times.push(val);
+    hidden.value = serializeTimes(times);
+    picker.value = "";
+    renderTimes();
+  }
+
+    const addBtn = document.getElementById("add_time_btn");
+    if (addBtn) addBtn.addEventListener("click", addTime);
+
+    renderTimes();
+
+    function toAmPm(hhmm) {
+    // hhmm is "HH:MM"
+    const [hStr, mStr] = hhmm.split(":");
+    let h = parseInt(hStr, 10);
+    const m = mStr;
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${h}:${m} ${ampm}`;
+    }
+
+</script>

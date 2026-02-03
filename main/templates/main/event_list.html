@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Events</title>
+</head>
+<body>
+    <h1>Events</h1>
+
+    <p><a href="{% url 'main:home' %}">Home</a></p>
+    <p><a href="{% url 'main:event_add' %}">+ Add Event</a></p>
+    <form method="get">
+        <input type="text" name="q" placeholder="Search..." value="{{ q }}">
+        <button type="submit">Search</button>
+        <a href="{% url 'main:event_list' %}">Reset</a>
+    </form>
+
+    <ul>
+        {% for event in events %}
+            <li>
+                <a href="{% url 'main:event_detail' event.pk %}">{{ event.title }}</a>
+                {% if event.start_datetime %} - {{ event.start_datetime }}{% endif %}
+            </li>
+        {% empty %}
+            <li>No events.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

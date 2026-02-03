@@ -1,0 +1,57 @@
+{% load habit_extras %}
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ habit.name }}</title>
+</head>
+<body>
+    <p><a href="{% url 'main:habit_list' %}">← Back to list</a></p>
+
+    <h1>{{ habit.name }}</h1>
+
+    <p>
+        <a href="{% url 'main:habit_edit' habit.pk %}">Edit</a> |
+        <a href="{% url 'main:habit_delete' habit.pk %}">Delete</a>
+    </p>
+
+    <p><strong>Active:</strong> {{ habit.active }}</p>
+    <p><strong>Frequency:</strong> {{ habit.get_frequency_display }}</p>
+    <p><strong>Target count:</strong> {{ habit.target_count }}</p>
+
+    {% if habit.preferred_times %}
+        <p><strong>Preferred times:</strong> {{ habit.preferred_times|time_labels }}</p>
+    {% endif %}
+
+    {% if habit.preferred_weekdays %}
+        <p><strong>Preferred weekdays:</strong> {{ habit.preferred_weekdays|weekday_labels }}</p>
+    {% endif %}
+
+    {% if habit.preferred_months %}
+        <p><strong>Preferred months:</strong> {{ habit.preferred_months|month_labels }}</p>
+    {% endif %}
+
+    <hr>
+
+    <p><strong>Reminder:</strong> {{ habit.reminder_enabled }}</p>
+
+    {% if habit.reminder_enabled %}
+        {% if habit.reminder_start %}
+            <p><strong>Remind on:</strong> {{ habit.reminder_start }}</p>
+        {% endif %}
+
+        <p><strong>Repeat:</strong> {{ habit.get_reminder_repeat_display }}</p>
+
+        {% if habit.reminder_repeat != "none" %}
+            {% if habit.reminder_until %}
+                <p><strong>Repeat until:</strong> {{ habit.reminder_until }}</p>
+            {% else %}
+                <p><strong>Repeat until:</strong> Infinite</p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    <h2>Check-ins</h2>
+    <p><a href="{% url 'main:habit_checkin_list' habit.pk %}">View check-ins</a></p>
+</body>
+</html>

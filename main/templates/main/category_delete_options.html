@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Delete Category</title>
+</head>
+<body>
+    <h1>Delete Category</h1>
+
+    <p>Category: <strong>{{ category.name }}</strong></p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <fieldset>
+            <legend>What should happen to tasks and events in this category?</legend>
+
+            <label>
+                <input type="radio" name="action" value="inbox" checked>
+                Move everything to Inbox (default)
+            </label>
+            <br>
+
+            <label>
+                <input type="radio" name="action" value="move">
+                Move everything to another category:
+            </label>
+
+            <select name="target_category">
+                {% for c in other_categories %}
+                    <option value="{{ c.pk }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
+
+            <label>
+                <input type="radio" name="action" value="delete_all">
+                Delete all tasks and events in this category
+            </label>
+        </fieldset>
+
+        <br>
+        <button type="submit">Confirm</button>
+        <a href="{% url 'main:category_detail' category.pk %}">Cancel</a>
+    </form>
+</body>
+</html>

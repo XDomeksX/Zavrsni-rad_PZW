@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ task.title }}</title>
+</head>
+<body>
+    <p><a href="{% url 'main:task_list' %}">← Back to list</a></p>
+
+    <p>
+        <a href="{% url 'main:task_edit' task.pk %}">Edit</a> |
+        <a href="{% url 'main:task_delete' task.pk %}">Delete</a>
+    </p>
+
+    <h1>{{ task.title }}</h1>
+
+    <p><strong>Status:</strong> {{ task.get_status_display }}</p>
+    <p><strong>Priority:</strong> {{ task.get_priority_display }}</p>
+
+    {% if task.category %}
+        <p><strong>Category:</strong> {{ task.category.name }}</p>
+    {% endif %}
+
+    {% if task.due_date %}
+        <p><strong>Due date:</strong> {{ task.due_date }}</p>
+    {% endif %}
+
+    {% if task.estimated_time %}
+        <p><strong>Estimated time:</strong> {{ task.estimated_time }} min</p>
+    {% endif %}
+
+    {% if task.description %}
+        <p><strong>Description:</strong></p>
+        <p>{{ task.description }}</p>
+    {% endif %}
+</body>
+</html>

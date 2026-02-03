@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ category.name }}</title>
+</head>
+<body>
+    <p><a href="{% url 'main:category_list' %}">← Back to list</a></p>
+
+    <h1>{{ category.name }}</h1>
+
+    {% if not category.is_inbox %}
+    <p>
+        <a href="{% url 'main:category_edit' category.pk %}">Edit</a> |
+        <a href="{% url 'main:category_delete' category.pk %}">Delete</a>
+    </p>
+    {% else %}
+    <p><em>Inbox is a default category and cannot be edited or deleted.</em></p>
+    {% endif %}
+
+
+    <h2>Tasks in this category</h2>
+    <ul>
+        {% for task in category.tasks.all %}
+            <li>
+                <a href="{% url 'main:task_detail' task.pk %}">{{ task.title }}</a>
+            </li>
+        {% empty %}
+            <li>No tasks in this category.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Events in this category</h2>
+    <ul>
+        {% for event in category.events.all %}
+            <li>{{ event.title }}</li>
+        {% empty %}
+            <li>No events in this category.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

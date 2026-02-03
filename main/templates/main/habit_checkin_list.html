@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Check-ins - {{ habit.name }}</title>
+</head>
+<body>
+    <p><a href="{% url 'main:habit_detail' habit.pk %}">← Back to habit</a></p>
+
+    <h1>Check-ins: {{ habit.name }}</h1>
+
+    <p><a href="{% url 'main:habit_checkin_add' habit.pk %}">+ Add Check-in</a></p>
+
+    <ul>
+        {% for c in checkins %}
+            <li>
+                {{ c.performed_at }} - {% if c.done %}Done{% else %}Not done{% endif %}
+                <a href="{% url 'main:habit_checkin_delete' c.pk %}">Delete</a>
+            </li>
+        {% empty %}
+            <li>No check-ins.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

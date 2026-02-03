@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Habits</title>
+</head>
+<body>
+    <h1>Habits</h1>
+
+    <p><a href="{% url 'main:home' %}">Home</a></p>
+    <p><a href="{% url 'main:habit_add' %}">+ Add Habit</a></p>
+
+    <ul>
+        {% for h in habits %}
+            <li>
+                <a href="{% url 'main:habit_detail' h.pk %}">{{ h.name }}</a>
+                {% if not h.active %}(inactive){% endif %}
+            </li>
+        {% empty %}
+            <li>No habits.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
